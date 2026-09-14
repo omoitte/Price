@@ -3052,7 +3052,7 @@ const BUY = [
 {"k":"B050130393","code":"B050130393","name":"HENKE-JECT, 10ml (bulk) [100ea/pk], ABC10LS","n":15,"qty":183,"amt":4504100,"first":"2024-03-28","last":"2026-07-14","lp":26800,"mn":13000,"mx":30700,"ven":"(주)휴텍스","biz":"입찰-소모품","kind":"시약","dept":"수질환경팀","h":[["2026-07-14",26800,10,"(주)휴텍스 ","수질환경팀"],["2026-04-08",18000,10,"(주)휴텍스 ","수질환경팀"],["2025-11-03",18400,10,"대성과학상사","수질환경팀"]]},
 {"k":"B050130394","code":"B050130394","name":"PP, Syringe Filter, 13mm, 0.22um, 100/pk (MS SFPP013022NC)","n":2,"qty":4,"amt":218840,"first":"2024-08-08","last":"2025-06-09","lp":52920,"mn":52920,"mx":56500,"ven":"(주)휴텍스","biz":"수의계약-소모품","kind":"소모품","dept":"광주시험인증센터","h":[["2025-06-09",52920,2,"대성과학상사","광주시험인증센터"],["2024-08-08",56500,2,"(주)휴텍스","광주시험인증센터"]]},
 {"k":"B050130395","code":"B050130395","name":"클로렐라 물벼룩 먹이 250mL (DMF-C250)","n":5,"qty":11,"amt":638000,"first":"2024-03-28","last":"2026-04-22","lp":58000,"mn":58000,"mx":58000,"ven":"주식회사 에코프런티어","biz":"수의계약-소모품","kind":"소모품","dept":"광주시험인증센터","h":[["2026-04-22",58000,1,"주식회사 에코프런티어","광주시험인증센터"],["2026-03-17",58000,1,"주식회사 에코프런티어","광주시험인증센터"],["2026-03-06",58000,3,"주식회사 에코프런티어","광주시험인증센터"]]},
-{"k":"B050130396","code":"B050130396","name":"YCT 물벼룩 먹이, 100mL, 에코프런티어, DMF-Y100","n":31,"qty":59,"amt":2596000,"first":"2024-03-28","last":"2026-08-06","lp":44000,"mn":44000,"mx":44000,"ven":"주식회사 에코프런티어","biz":"수의계약-소모품","kind":"소모품","dept":"광주시험인증센터","h":[["2026-08-06",44000,2,"주식회사 에코프런티어","광주시험인증센터"],["2026-07-23",44000,1,"주식회사 에코프런티어","광주시험인증센터"],["2026-06-09",44000,2,"주식회사 에코프런티어","광주시험인증센터"]]},
+{"k":"B050130396","y":{"2024":[44000,10,880000],"2025":[44000,13,1100000],"2026":[44000,8,528000]},"code":"B050130396","name":"YCT 물벼룩 먹이, 100mL, 에코프런티어, DMF-Y100","n":31,"qty":59,"amt":2596000,"first":"2024-03-28","last":"2026-08-06","lp":44000,"mn":44000,"mx":44000,"ven":"주식회사 에코프런티어","biz":"수의계약-소모품","kind":"소모품","dept":"광주시험인증센터","h":[["2026-08-06",44000,2,"주식회사 에코프런티어","광주시험인증센터"],["2026-07-23",44000,1,"주식회사 에코프런티어","광주시험인증센터"],["2026-06-09",44000,2,"주식회사 에코프런티어","광주시험인증센터"]]},
 {"k":"B050130399","code":"B050130399","name":"EC620SSP 격막세트 (01X609501)","n":3,"qty":15,"amt":3725000,"first":"2024-07-29","last":"2026-06-24","lp":253000,"mn":236000,"mx":256000,"ven":"서울공구","biz":"입찰-소모품","kind":"소모품","dept":"광주시험인증센터","h":[["2026-06-24",253000,5,"서울공구","광주시험인증센터"],["2025-04-01",236000,5,"서울공구","광주시험인증센터"],["2024-07-29",256000,5,"(주)코아테크코리아","광주시험인증센터"]]},
 {"k":"B050130402","code":"B050130402","name":"잔류염소 측정 키트(B50-FreeCI), 50/pk","n":3,"qty":5,"amt":143000,"first":"2024-12-04","last":"2025-05-19","lp":27000,"mn":27000,"mx":35000,"ven":"경동과학상사","biz":"수의계약-소모품","kind":"소모품","dept":"전주시험인증센터","h":[["2025-05-19",27000,3,"경동과학상사","광주시험인증센터"],["2025-04-03",27000,1,"제이에스텍(JS-Tech)","전주시험인증센터"],["2024-12-04",35000,1,"경동과학상사","전주시험인증센터"]]},
 {"k":"B050130403","code":"B050130403","name":"Macherey-Nagel pH 시험지(독일)스틱형 0~14, pH-FIX, 100/pl","n":4,"qty":16,"amt":438000,"first":"2024-04-05","last":"2026-04-03","lp":30000,"mn":27000,"mx":30000,"ven":"경동과학상사","biz":"수의계약-소모품","kind":"소모품","dept":"전주시험인증센터","h":[["2026-04-03",30000,2,"제이에스텍(JS-Tech)","전주시험인증센터"],["2024-12-04",27000,2,"경동과학상사","전주시험인증센터"],["2024-07-08",27000,2,"경동과학상사","전주시험인증센터"]]},
@@ -4896,6 +4896,15 @@ function logHist(e) {
 const $ = id => document.getElementById(id);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const nkey = s => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+/* 구분 칩 매칭 — "에코프런티어" 칩이 거래처명 "주식회사 에코프런티어" 도 잡도록.
+   단가표 품목과 실구매 품목이 같은 칩에 묶인다. */
+const vkey = s => String(s || "").replace(/[\s()（）]|주식회사|㈜|\(주\)|소모품/g, "");
+function vendorHit(a, b) {
+  if (a === b) return true;
+  const x = vkey(a), y = vkey(b);
+  return !!x && !!y && (x.includes(y) || y.includes(x));
+}
 const won = n => (n == null || n === "") ? "" : Number(n).toLocaleString("ko-KR");
 
 /* 섬유시험 소모품은 사내 표기에 맞춰 품목코드를 하이픈 없이 쓴다. (B07005-4126 → B070054126)
@@ -4920,7 +4929,8 @@ function items() {
   const have = new Set(out.map(o => o.key).filter(Boolean));
   BUY.forEach(b => {
     if (have.has(b.k) || db.deleted["P" + b.k]) return;
-    out.push({ id:"P" + b.k, vendor:"실구매", year:Number((b.last || "").slice(0, 4)) || null,
+    // 단가표에 없는 품목은 실제 거래처를 구분으로 쓴다 (에코프런티어처럼 일부만 견적이 있는 경우)
+    out.push({ id:"P" + b.k, vendor: b.ven || "실구매", year:Number((b.last || "").slice(0, 4)) || null,
                code:b.code, name:b.name, key:b.k, pkey:"",
                price:null, list:null, note:"", src:"구매통계 (발주 이력)", _buyonly:true });
   });
@@ -4973,7 +4983,7 @@ function renderFilters() {
     const b = el("button", "chip");
     b.setAttribute("aria-pressed", sel.has(v) ? "true" : "false");
     b.appendChild(document.createTextNode(v));
-    b.appendChild(el("b", null, String(all.filter(x => x.vendor === v).length)));
+    b.appendChild(el("b", null, String(all.filter(x => vendorHit(x.vendor, v)).length)));
     b.onclick = () => { sel.has(v) ? sel.delete(v) : sel.add(v); renderFilters(); renderSearch(); };
     f.appendChild(b);
   });
@@ -4996,7 +5006,7 @@ const colFilter = {};            // 엑셀 자동필터: 열 → 검색어
 function rowsForView() {
   const q = $("q").value;
   let list = items();
-  if (sel.size) list = list.filter(x => sel.has(x.vendor));
+  if (sel.size) list = list.filter(x => [...sel].some(v => vendorHit(x.vendor, v)));
   list = search(list, q);
 
   const m = new Map();
@@ -5383,7 +5393,7 @@ function removeItem() {
 async function csv() {
   const q = $("q").value;
   let list = items();
-  if (sel.size) list = list.filter(x => sel.has(x.vendor));
+  if (sel.size) list = list.filter(x => [...sel].some(v => vendorHit(x.vendor, v)));
   list = search(list, q);
   const cols = ["vendor","year","code","partno","name","spec","maker","list","price","note","src"];
   const esc = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
