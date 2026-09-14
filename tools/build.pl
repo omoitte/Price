@@ -18,8 +18,21 @@ sub rows {                      # TSV 읽기 (### SHEET 줄은 시트 경계)
   }
   close $fh; return @out;
 }
-sub cell { my ($r, $i) = @_; my $v = $r->{c}[$i]; return defined $v ? do { $v =~ s/^\s+|\s+$//g; $v } : ""; }
-sub num  { my $v = shift // ""; $v =~ s/[^0-9.\-]//g; return $v eq "" || $v eq "-" ? undef : 0 + $v; }
+# 엑셀에서 "값 없음" 표시로 쓰는 대시(- – — －)는 빈칸으로 본다
+sub cell {
+  my ($r, $i) = @_;
+  my $v = $r->{c}[$i];
+  return "" unless defined $v;
+  $v =~ s/^\s+|\s+$//g;
+  return "" if $v =~ /^[-\x{2013}\x{2014}\x{FF0D}\s]*$/;
+  return $v;
+}
+sub num  {
+  my $v = shift // "";
+  return undef if $v =~ /^[-\x{2013}\x{2014}\x{FF0D}\s]*$/;
+  $v =~ s/[^0-9.\-]//g;
+  return $v eq "" || $v eq "-" ? undef : 0 + $v;
+}
 sub norm { my $v = shift // ""; $v = uc $v; $v =~ s/[^A-Z0-9]//g; return $v; }   # 코드 정규화(하이픈 제거)
 sub esc  { my $s = shift // ""; $s =~ s/\\/\\\\/g; $s =~ s/"/\\"/g; $s =~ s/[\r\n\t]+/ /g; return $s; }
 
@@ -97,11 +110,13 @@ for my $r (rows("metal.tsv")) {
 }
 
 # ── 에코프런티어 견적서 (PDF에서 읽음) ──
-add(vendor => "에코프런티어", year => 2026, partno => "DMF-Y100",
+# 견적서에는 품목코드가 없어 발주 이력과 안 붙는다. 제품번호·가격이 일치하는
+# 사내 품목코드를 직접 지정해 묶는다. (DMF-Y100 → B050130396, DMF-C200 → B050070045)
+add(vendor => "에코프런티어", year => 2026, partno => "DMF-Y100", code => "B050130396",
     name => "물벼룩 보조먹이 (YCT)", spec => "100ml/PK", price => 44000,
     note => "견적번호 EF견 260805Y-01 · 유효 2026-12-31 · 냉장(냉동) 배송",
     src => "에코프런티어_26년도 견적서.pdf");
-add(vendor => "에코프런티어", year => 2026, partno => "DMF-C200",
+add(vendor => "에코프런티어", year => 2026, partno => "DMF-C200", code => "B050070045",
     name => "물벼룩 주먹이 (chlorella)", spec => "200ml/PK", price => 50000,
     note => "견적번호 EF견 260805Y-01 · 유효 2026-12-31 · 냉장(냉동) 배송",
     src => "에코프런티어_26년도 견적서.pdf");

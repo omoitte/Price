@@ -51,9 +51,25 @@ close $f;
 my @out;
 for my $k (sort keys %it) {
   my $r = $it{$k};
-  my @h = sort { ($b->[0] // "") cmp ($a->[0] // "") } @{ $r->{hist} };
-  @h = @h[0 .. ($#h > 2 ? 2 : $#h)];                       # 최근 3건만
+  my @all = sort { ($b->[0] // "") cmp ($a->[0] // "") } @{ $r->{hist} };   # 최신순
+
+  # 연도별 집계 — 그 해 가장 최근 단가 · 발주 횟수 · 금액
+  my %yr;
+  for my $x (@all) {
+    my $y = substr($x->[0] // "", 0, 4);
+    next unless $y =~ /^\d{4}$/;
+    my $s = $yr{$y} ||= { p => undef, n => 0, amt => 0 };
+    $s->{p} = $x->[1] if !defined $s->{p} && defined $x->[1];   # 최신순이라 처음 것이 그 해 최근값
+    $s->{n}++;
+    $s->{amt} += ($x->[1] // 0) * ($x->[2] // 0);
+  }
+  my $yjson = "{" . join(",", map {
+    '"' . $_ . '":[' . (defined $yr{$_}{p} ? $yr{$_}{p} : 'null') . ',' . $yr{$_}{n} . ',' . $yr{$_}{amt} . ']'
+  } sort keys %yr) . "}";
+
+  my @h = @all[0 .. ($#all > 2 ? 2 : $#all)];              # 상세용 최근 3건
   my @kv = (
+    '"y":' . $yjson,
     '"k":"'    . esc($k) . '"',
     '"code":"' . esc($r->{code}) . '"',
     '"name":"' . esc($r->{name}) . '"',
