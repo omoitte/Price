@@ -58,16 +58,20 @@ for my $k (sort keys %it) {
   for my $x (@all) {
     my $y = substr($x->[0] // "", 0, 4);
     next unless $y =~ /^\d{4}$/;
-    my $s = $yr{$y} ||= { p => undef, n => 0, amt => 0 };
-    $s->{p} = $x->[1] if !defined $s->{p} && defined $x->[1];   # 최신순이라 처음 것이 그 해 최근값
+    my $s = $yr{$y} ||= { p => undef, n => 0, amt => 0, d => "" };
+    if (!defined $s->{p} && defined $x->[1]) {                  # 최신순이라 처음 것이 그 해 최근값
+      $s->{p} = $x->[1];
+      $s->{d} = $x->[0] // "";                                  # 그 단가로 산 날짜
+    }
     $s->{n}++;
     $s->{amt} += ($x->[1] // 0) * ($x->[2] // 0);
   }
   my $yjson = "{" . join(",", map {
-    '"' . $_ . '":[' . (defined $yr{$_}{p} ? $yr{$_}{p} : 'null') . ',' . $yr{$_}{n} . ',' . $yr{$_}{amt} . ']'
+    '"' . $_ . '":[' . (defined $yr{$_}{p} ? $yr{$_}{p} : 'null') . ',' . $yr{$_}{n} . ',' . $yr{$_}{amt} .
+    ',"' . esc($yr{$_}{d}) . '"]'
   } sort keys %yr) . "}";
 
-  my @h = @all[0 .. ($#all > 2 ? 2 : $#all)];              # 상세용 최근 3건
+  my @h = @all;                                            # 상세용 — 발주 전부 (최신순)
   my @kv = (
     '"y":' . $yjson,
     '"k":"'    . esc($k) . '"',
