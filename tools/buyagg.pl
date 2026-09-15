@@ -82,6 +82,7 @@ for my $k (sort keys %it) {
     (defined $r->{mn} ? '"mn":' . $r->{mn} : ()),
     (defined $r->{mx} ? '"mx":' . $r->{mx} : ()),
     '"ven":"'  . esc(top($r->{ven}))  . '"',
+    '"vn":'    . scalar(keys %{ $r->{ven} }),        # 거래처 수 — 화면에서 "외 N" 으로 쓴다
     '"biz":"'  . esc(top($r->{biz}))  . '"',
     '"kind":"' . esc(top($r->{kind})) . '"',
     '"dept":"' . esc(top($r->{dept})) . '"',

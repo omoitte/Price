@@ -20,6 +20,19 @@ perl tools/xlsx2tsv.pl "../휴텍스.xlsx"                                      
 echo "2/4  발주 이력 읽는 중…"
 perl tools/xlsx2tsv.pl "$DEV/구매통계_소모품_시약_구분_(2024-202608) - 수정 중.xlsx" > "$RAW/stat.tsv"
 
+# 열 순서가 바뀌면 엉뚱한 칸을 읽으므로 헤더를 확인하고 멈춘다
+HDR=$(grep -m1 '^No	' "$RAW/stat.tsv" || true)
+echo "   헤더: $HDR"
+EXPECT='No	발주일	년도	월	구매업무	구매구분	구매번호	구매품의일자	발주번호	업체명	품목코드	품목명	발주단가	발주수량	발주금액'
+if [ "$(printf '%s' "$HDR" | cut -f1-15)" != "$EXPECT" ]; then
+  echo
+  echo "!! 열 순서가 예상과 다릅니다. buyagg.pl 의 열 번호를 고쳐야 합니다."
+  echo "   예상: $EXPECT"
+  echo "   실제: $(printf '%s' "$HDR" | cut -f1-15)"
+  echo "   위 두 줄을 그대로 알려주시면 맞춰 드리겠습니다."
+  exit 1
+fi
+
 echo "3/4  통합 데이터 만드는 중…"
 perl tools/build.pl  "$RAW"        > catalog.json
 perl tools/buyagg.pl "$RAW/stat.tsv" > purchases.json
