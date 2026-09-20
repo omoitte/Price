@@ -54,9 +54,14 @@ button{background:none;border:none;cursor:pointer}
 
 /* 헤더 */
 header{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--rule)}
-.htop{display:flex;align-items:baseline;gap:14px;padding:16px 0 12px}
+.htop{display:flex;align-items:center;gap:14px;padding:16px 0 12px}
 h1{font-size:17px;font-weight:700;letter-spacing:-.02em}
 .sub{font-size:11.5px;color:var(--ink-dim)}
+/* 헤더 공통 형식 (2026-09-20 · 02·03·04·05·06 동일)
+   제목 한 줄 + 그 아래 흐린 소속 한 줄. 포털 헤더와 같은 짜임입니다. */
+.brand-txt{display:flex;flex-direction:column;line-height:1.2;min-width:0}
+.brand-sub{font-size:11px;font-weight:600;color:#8a93a6;letter-spacing:.01em;margin-top:3px;white-space:nowrap}
+@media(max-width:640px){.brand-sub{display:none}}
 /* ── 틀 고정 : 머리글은 위에, 품목코드·품목명은 왼쪽에 붙어 있게 ── */
 table.grid th.c-code,table.grid td.c-code{position:sticky;left:0}
 table.grid th.c-name,table.grid td.c-name{position:sticky;left:112px}
@@ -271,12 +276,15 @@ table.hist td.up{color:#9e2020}
 <header>
   <div class="wrap">
     <div class="htop">
-      <h1>소모품 가격검색</h1>
+      <span class="brand-txt">
+        <h1>소모품 가격검색</h1>
+        <span class="brand-sub">사업지원본부 · 전략구매팀 · v1.1</span>
+      </span>
       <span class="sub" id="subline">—</span><span class="build">build 0915-D</span><span class="connstate" id="connState">연결 확인 중…</span>
       <nav>
+        <a class="navb" href="https://fiti-procurement-portal.vercel.app/" title="전략구매팀 업무포털로 이동">← 업무포털</a>
         <button class="navb" id="nav-search" aria-current="true">검색</button>
         <button class="navb" id="nav-hist">수정 이력</button>
-        <a class="navb" href="https://fiti-procurement-portal.vercel.app/" title="전략구매팀 업무포털로 이동">← 업무포털</a>
       </nav>
     </div>
 
