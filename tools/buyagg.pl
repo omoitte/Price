@@ -8,6 +8,18 @@ sub nk { my $v = shift // ""; $v = uc $v; $v =~ s/[^A-Z0-9]//g; return $v; }
 sub esc { my $s = shift // ""; $s =~ s/\\/\\\\/g; $s =~ s/"/\\"/g; $s =~ s/[\r\n\t]+/ /g; return $s; }
 sub top { my $h = shift; my @k = sort { $h->{$b} <=> $h->{$a} || $a cmp $b } keys %$h; return $k[0] // ""; }
 
+# 발주일이 엑셀 일련번호(예: 45372)로 들어오는 파일이 있습니다.
+# 그대로 두면 연도를 "4537" 로 읽어 집계가 통째로 어긋납니다. YYYY-MM-DD 로 바꿉니다.
+sub xdate {
+  my $v = shift // "";
+  $v =~ s/^\s+|\s+$//g;
+  return $v unless $v =~ /^\d+(\.\d+)?$/;        # 이미 날짜 문자열이면 그대로
+  my $n = int($v);
+  return $v if $n < 20000 || $n > 80000;         # 날짜로 보기 어려운 값은 건드리지 않음
+  my @t = gmtime(($n - 25569) * 86400);          # 엑셀 1899-12-30 기준
+  return sprintf("%04d-%02d-%02d", $t[5] + 1900, $t[4] + 1, $t[3]);
+}
+
 my (%it, $sheet, @hdr);
 open my $f, '<:encoding(UTF-8)', $TSV or die;
 while (<$f>) {
@@ -25,7 +37,7 @@ while (<$f>) {
   my $price = ($c[12] // "") =~ /^\d+(\.\d+)?$/ ? 0 + $c[12] : undef;
   my $qty   = ($c[13] // "") =~ /^\d+(\.\d+)?$/ ? 0 + $c[13] : 0;
   my $amt   = ($c[14] // "") =~ /^\d+(\.\d+)?$/ ? 0 + $c[14] : 0;
-  my $date  = $c[1] // "";
+  my $date  = xdate($c[1]);
 
   my $r = $it{$k} ||= { code => $code, name => "", n => 0, qty => 0, amt => 0,
                         first => "", last => "", lp => undef, mn => undef, mx => undef,

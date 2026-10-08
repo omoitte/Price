@@ -16,11 +16,11 @@ RAW="$(mktemp -d)"; trap 'rm -rf "$RAW"' EXIT
 
 # ── 발주 이력 엑셀 찾기 ───────────────────────────────────────────────
 # 파일명에 기간이 들어가 매달 바뀌므로(202608 → 202609 …) 최신 수정본을 자동으로 고릅니다.
-STAT="$(ls -t "$DEV"/구매통계_소모품_시약_구분_*.xlsx 2>/dev/null | head -1 || true)"
+STAT="$(ls -t "$DEV"/구매현황_업로드_*.xlsx "$DEV"/구매통계_소모품_시약_구분_*.xlsx 2>/dev/null | head -1 || true)"
 if [ -z "$STAT" ]; then
   echo "!! 발주 이력 엑셀을 찾지 못했습니다."
   echo "   찾은 곳 : $DEV"
-  echo "   이름 규칙: 구매통계_소모품_시약_구분_*.xlsx"
+  echo "   이름 규칙: 구매현황_업로드_*.xlsx  또는  구매통계_소모품_시약_구분_*.xlsx"
   exit 1
 fi
 echo "발주 이력 : $(basename "$STAT")"
