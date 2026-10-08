@@ -79,6 +79,7 @@ table.grid th.c-name,table.grid td.c-name{border-right:2px solid var(--rule)}   
 .biztag.priv{background:var(--amber-soft);color:var(--amber)}
 .biztag.fund{background:var(--up-soft);color:var(--up)}
 .biztag.etc{background:var(--sheet-2);color:var(--ink-dim)}
+.biztag.unit{background:#e8e3fb;color:#5b3fd1}
 .build{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--paper);background:var(--teal);border-radius:4px;padding:1px 6px;white-space:nowrap}
 .connstate{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--low);border:1px solid var(--low);border-radius:4px;padding:1px 6px;white-space:nowrap}
 .sitefoot{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:26px 0 30px;padding-top:14px;border-top:1px solid var(--rule);font-size:11px;color:var(--ink-dim)}
@@ -4962,6 +4963,7 @@ const buyerOf = r =>
 function bizTag(s) {
   if (!s) return null;
   const 사업비 = /사업비/.test(s);
+  if (/단가계약/.test(s)) return { txt: "단가계약", cls: "unit" };
   if (/입찰/.test(s))  return { txt: 사업비 ? "입찰·사업비" : "입찰",   cls: "bid" };
   if (/수의/.test(s))  return { txt: 사업비 ? "수의·사업비" : "수의계약", cls: "priv" };
   if (사업비)          return { txt: "사업비", cls: "fund" };
@@ -5622,5 +5624,17 @@ pull().then(ok => { if (ok) { renderFilters(); renderSearch(); renderHist(); } }
 })();
 </script>
 
+
+<!-- ─────────────────────────────────────────────────────────────
+     업무포털 주소 — 포털 주소가 바뀌면 **아래 한 줄만** 고치세요.
+     이 스크립트가 페이지 안의 「← 업무포털」 링크를 전부 바꿔 줍니다.
+     ───────────────────────────────────────────────────────────── -->
+<script>
+  window.FITI_PORTAL = 'https://fiti-procurement-portal.vercel.app/';
+  (function () {
+    var sel = 'a[href*="procurement-portal"], a[data-portal]';
+    document.querySelectorAll(sel).forEach(function (a) { a.href = window.FITI_PORTAL; });
+  })();
+</script>
 </body>
 </html>
