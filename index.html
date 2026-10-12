@@ -5724,8 +5724,33 @@ pull().then(ok => { if (ok) { renderFilters(); renderSearch(); renderHist(); } }
 <script>
   window.FITI_PORTAL = 'https://fiti-procurement-portal.vercel.app/';
   (function () {
+    /* 수요부서 포털에서 넘어오면 주소에 ?from=dept&back=<돌아갈 주소> 가 붙습니다.
+       그때는 「← 업무포털」이 전략구매팀 포털이 아니라 수요부서 포털로 돌아갑니다.
+       한 번 들어오면 그 탭이 기억하므로(sessionStorage) 앱 안에서 옮겨 다녀도 유지됩니다.
+       back 은 주소로 들어오는 값이라 https 의 vercel.app 만 받습니다. */
+    var KEY = 'fiti.portalBack';
+    function clean(u) {
+      try { var x = new URL(u); return (x.protocol === 'https:' && /\.vercel\.app$/.test(x.hostname)) ? x.origin + x.pathname : ''; }
+      catch (e) { return ''; }
+    }
+    var back = '';
+    try {
+      var p = new URLSearchParams(location.search);
+      back = (p.get('from') === 'dept') ? clean(p.get('back') || '') : '';
+      if (back) sessionStorage.setItem(KEY, back);
+      else back = clean(sessionStorage.getItem(KEY) || '');
+    } catch (e) { back = ''; }
+
+    var target = back || window.FITI_PORTAL;
     var sel = 'a[href*="procurement-portal"], a[data-portal]';
-    document.querySelectorAll(sel).forEach(function (a) { a.href = window.FITI_PORTAL; });
+    document.querySelectorAll(sel).forEach(function (a) {
+      a.href = target;
+      if (!back) return;
+      a.title = '수요부서 업무포털로 이동';
+      if (!a.children.length && /업무포털/.test(a.textContent)) {
+        a.textContent = a.textContent.replace('전략구매팀 업무포털', '수요부서 업무포털').replace(/^←\s*업무포털$/, '← 수요부서 포털');
+      }
+    });
   })();
 </script>
 </body>
