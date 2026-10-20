@@ -210,6 +210,9 @@ table.hist i.tag{font-style:normal;font-size:9px;font-weight:700;margin-left:5px
 table.hist i.tag.lo{background:rgba(16,140,90,.16);color:#0b6b46}
 table.hist i.tag.hi{background:rgba(190,40,40,.14);color:#9e2020}
 table.hist td.up{color:#9e2020}
+table.hist td.biz{font-size:11px}
+table.hist td.biz i.biztag{display:inline-block;margin-top:0}
+.biztag + .biztag{margin-top:2px}
 .sortmark{color:var(--teal)}
 .c-code{width:112px;min-width:112px;max-width:112px;white-space:nowrap;color:var(--teal);font-weight:600}
 .c-code.nocode{color:var(--ink-dim);font-weight:500}
@@ -269,6 +272,45 @@ table.hist td.up{color:#9e2020}
   .hwho{text-align:left}
   table.v .hide-s{display:none}
 }
+
+/* ── 폰 (2026-10-20) ────────────────────────────────────────
+   머리글이 한 줄에 다 들어가려다 제목이 **세로로 한 글자씩** 쪼개졌습니다.
+   flex 가 줄을 못 바꾸니 글자 단위로 줄여 버린 것입니다.
+   줄을 바꾸게 하고, 끊기면 안 되는 것에는 nowrap 을 박습니다. */
+@media (max-width:640px){
+  .htop{flex-wrap:wrap;gap:8px 10px;padding:12px 0 10px}
+  .htop h1{white-space:nowrap}
+  .htop .sub{flex:1 1 100%;order:3;white-space:normal;line-height:1.5}
+  .htop .build,.htop .connstate{order:2}
+  .htop nav{order:4;margin-left:0;width:100%}
+  .htop nav .navb{flex:1;text-align:center;white-space:nowrap}
+
+  /* 검색줄 — CSV 단추가 화면 밖으로 밀려나 있었습니다 */
+  .searchrow{flex-wrap:wrap}
+  .searchbox{flex:1 1 100%}
+
+  /* 표 — 가로로 밀어 보는 것은 그대로 두되, 칸이 눌려 찌그러지지 않게 바닥을 깝니다.
+     품목명까지 왼쪽에 붙여 두면 폰에서는 볼 자리가 100px 남짓밖에 안 남습니다 —
+     품목코드 한 칸만 붙여 둡니다. */
+  .tablewrap{max-height:calc(100vh - 300px)}
+  /* 폰 한 화면에 1,064px 짜리 표를 다 넣을 수는 없습니다.
+     지난 연도(24·25년)·수정 단추·칸별 필터를 접어 **지금 값**만 먼저 보이게 합니다 —
+     품목코드 · 품목명 · 거래처(수의/입찰) · 26년 · 구매 건수. 나머지는 옆으로 밀면 나옵니다. */
+  table.grid th.c-yr:not(.strong),table.grid td.c-yr:not(.strong){display:none}
+  table.grid th.c-act,table.grid td.c-act{display:none}
+  .filterrow{display:none}
+  /* 남은 칸도 폰에 맞춰 좁힙니다 — 품목명 300px 가 화면을 거의 다 먹고 있었습니다 */
+  table.grid th.c-code,table.grid td.c-code{width:96px;min-width:96px;max-width:96px}
+  table.grid th.c-name,table.grid td.c-name{width:170px;min-width:170px;max-width:170px;white-space:normal}
+  table.grid th.c-vd,table.grid td.c-vd{width:104px;min-width:104px;max-width:104px}
+  table.grid th.c-yr,table.grid td.c-yr{width:92px}
+  table.grid th.c-n2,table.grid td.c-n2{width:46px}
+  table.grid{min-width:0}
+
+
+  table.grid th.c-name,table.grid td.c-name{position:static;border-right:1px solid var(--rule-soft)}
+  table.grid th.c-code,table.grid td.c-code{border-right:2px solid var(--rule)}
+}
 </style>
 </head>
 <body>
@@ -281,9 +323,8 @@ table.hist td.up{color:#9e2020}
         <h1>소모품 가격검색</h1>
         <span class="brand-sub">사업지원본부 · 전략구매팀 · v1.1</span>
       </span>
-      <span class="sub" id="subline">—</span><span class="build">build 0915-D</span><span class="connstate" id="connState">연결 확인 중…</span>
+      <span class="sub" id="subline">—</span><span class="build">build 1020-A</span><span class="connstate" id="connState">연결 확인 중…</span>
       <nav>
-        <a class="navb" href="https://fiti-procurement-portal.vercel.app/" title="전략구매팀 업무포털로 이동">← 업무포털</a>
         <button class="navb" id="nav-search" aria-current="true">검색</button>
         <button class="navb" id="nav-hist">수정 이력</button>
       </nav>
@@ -319,8 +360,6 @@ table.hist td.up{color:#9e2020}
     <span>FITI시험연구원 · 사업지원본부 전략구매팀</span>
     <span class="sitefoot__sep" aria-hidden="true">·</span>
     <span>소모품 가격검색 v1.1</span>
-    <span class="sitefoot__sep" aria-hidden="true">·</span>
-    <a href="https://fiti-procurement-portal.vercel.app/">← 업무포털</a>
   </footer>
 
 </main>
@@ -5047,9 +5086,18 @@ const won = n => (n == null || n === "") ? "" : Number(n).toLocaleString("ko-KR"
 
 /* 섬유시험 소모품은 사내 표기에 맞춰 품목코드를 하이픈 없이 쓴다. (B07005-4126 → B070054126)
    원본 데이터는 그대로 두고 화면 표기만 바꾼다. 검색·발주이력 연결은 nkey가 하이픈을 무시하므로 영향 없다. */
-/* 표에 보여줄 거래처 — 실제 납품처가 우선, 없으면 단가표 공급사, 그것도 없으면 묶음명 */
+/* 표에 보여줄 거래처 — **가장 최근에 납품한 곳**이 우선입니다.
+   `ven` 은 가장 많이 산 곳(빈도 1위)이라 최근 거래처와 다를 수 있습니다.
+   두 번 샀는데 업체가 서로 다르면 옛 업체가 뽑혀 「최근 단가」와 어긋나 보입니다.
+   `h`(발주 이력)는 최근 순으로 정렬돼 있어 첫 줄의 거래처가 최근입니다. */
+const latestVen = b => {
+  if (!b) return "";
+  const h = b.h || [];
+  for (let i = 0; i < h.length; i++) { if (h[i] && h[i][3]) return h[i][3]; }
+  return b.ven || "";
+};
 const buyerOf = r =>
-  (r.buy && r.buy.ven) || r.sup || String(r.vendor || "").replace(" 소모품", "");
+  latestVen(r.buy) || r.sup || String(r.vendor || "").replace(" 소모품", "");
 
 /* 구매업무 → 계약 방식 배지. 수의계약·입찰·사업비를 한눈에 구분한다 */
 function bizTag(s) {
@@ -5242,7 +5290,8 @@ const COLS = [
   { k:"name",   t:"품목명",   cls:"c-name", get:r => r.name },
   { k:"vendor", t:"거래처",   cls:"c-vd",
     // 거래처·단가표 묶음·계약방식 전부 이 칸의 필터로 걸리게 한다
-    get:r => buyerOf(r) + " " + r.vendor + " " + ((bizTag(r.buy && r.buy.biz) || {}).txt || "") },
+    get:r => buyerOf(r) + " " + r.vendor + " "
+           + bizKinds(r.buy).map(k => k + " " + ((bizTag(k) || {}).txt || "")).join(" ") },
   { k:"y24",    t:"24년",     cls:"r c-yr", num:true, get:r => r.y24 },
   { k:"y25",    t:"25년",     cls:"r c-yr", num:true, get:r => r.y25 },
   { k:"y26",    t:"26년",     cls:"r c-yr strong", num:true, get:r => r.y267 != null ? r.y267 : r.y26 },
@@ -5372,11 +5421,16 @@ function renderSearch() {
     }
     tdv.appendChild(document.createTextNode(vtxt));
     // 계약 방식 — 수의냐 입찰이냐가 관리 방식을 가른다
-    const bz = bizTag(r.buy && r.buy.biz);
-    if (bz) tdv.appendChild(el("i", "biztag " + bz.cls, bz.txt));
+    const seen = {};
+    let tags = bizKinds(r.buy).map(bizTag).filter(Boolean)
+      .filter(t => { if (seen[t.txt]) return false; seen[t.txt] = 1; return true; });
+    /* 「소모품」처럼 계약 방식이 아닌 값(구매구분이 그대로 들어온 121건)은
+       방식이 하나라도 있으면 접습니다 — 이 칸은 수의냐 입찰이냐를 보는 자리입니다. */
+    if (tags.some(t => t.cls !== "etc")) tags = tags.filter(t => t.cls !== "etc");
+    tags.forEach(t => tdv.appendChild(el("i", "biztag " + t.cls, t.txt)));
     tdv.title = ["단가표 묶음 " + r.vendor,
-                 r.buy && r.buy.ven ? "주거래처 " + r.buy.ven + (r.buy.vn > 1 ? " 외 " + (r.buy.vn - 1) + "곳" : "") : "",
-                 r.buy && r.buy.biz ? "구매업무 " + r.buy.biz : "",
+                 r.buy ? "최근 거래처 " + latestVen(r.buy) + (r.buy.vn > 1 ? " 외 " + (r.buy.vn - 1) + "곳" : "") : "",
+                 r.buy ? "구매업무 " + (bizMix(r.buy.h || []) || r.buy.biz || "") : "",
                  r.sup ? "단가표 공급 " + r.sup : "", r.partno ? "제품번호 " + r.partno : "",
                  r.spec ? "규격·제조사 " + r.spec : "", r.list != null ? "소비자가 " + won(r.list) : "",
                  r.note, r.src].filter(Boolean).join("\n");
@@ -5491,6 +5545,27 @@ function renderHist() {
   });
 }
 
+/* 한 품목을 수의계약으로도 입찰로도 삽니다 — 대표값 하나만 보여 주면
+   「소모품이니 전부 수의계약」으로 읽힙니다. 가진 방식을 전부 내놓습니다. */
+function bizKinds(b) {
+  const c = {};
+  ((b && b.h) || []).forEach(x => { const v = bizOf(x); if (v) c[v] = (c[v] || 0) + 1; });
+  const ks = Object.keys(c).sort((p, q) => c[q] - c[p] || p.localeCompare(q));
+  if (!ks.length && b && b.biz) return [b.biz];
+  return ks;
+}
+
+/* 구매업무는 건마다 다릅니다 — 같은 소모품을 수의계약으로도, 입찰-소모품으로도 삽니다.
+   「소모품이니 전부 수의계약」이 아니어서 건별로 보여 줍니다. h[6] 에 들어 있습니다. */
+const bizOf = x => String((x && x[6]) || "").trim();
+function bizMix(rows) {
+  const c = {};
+  rows.forEach(x => { const v = bizOf(x); if (v) c[v] = (c[v] || 0) + 1; });
+  const ks = Object.keys(c).sort((a, b) => c[b] - c[a] || a.localeCompare(b));
+  if (!ks.length) return "";
+  return ks.map(k => k + " " + c[k] + "건").join("  ·  ");
+}
+
 /* ── 발주 이력 상세 ── */
 function openBuy(r) {
   const b = r.buy; if (!b) return;
@@ -5500,7 +5575,7 @@ function openBuy(r) {
    ["최근 단가", b.lp != null ? won(b.lp) : "—"],
    ["최저-최고", (b.mn != null ? won(b.mn) + " - " + won(b.mx) : "")],
    ["기간", (b.first || "") + " - " + (b.last || "")],
-   ["주거래처", b.ven], ["구매업무", b.biz], ["구매구분", b.kind], ["주요청부서", b.dept],
+   ["최근 거래처", latestVen(b)], ["주거래처", b.ven], ["구매업무", bizMix(b.h || []) || b.biz], ["구매구분", b.kind], ["주요청부서", b.dept],
   ].forEach(([k, v]) => {
     const row = el("div", "brow");
     row.appendChild(el("span", "bk", k));
@@ -5522,7 +5597,7 @@ function openBuy(r) {
 
   const tbl = el("table", "hist");
   const htr = el("tr");
-  [["발주일", ""], ["단가", "r"], ["최저대비", "r"], ["수량", "r"], ["금액", "r"],
+  [["발주일", ""], ["구매업무", ""], ["단가", "r"], ["최저대비", "r"], ["수량", "r"], ["금액", "r"],
    ["거래처", ""], ["부서", ""]].forEach(([t, c]) => htr.appendChild(el("th", c, t)));
   const thd = el("thead"); thd.appendChild(htr); tbl.appendChild(thd);
 
@@ -5536,15 +5611,24 @@ function openBuy(r) {
       const yp = ys.map(z => z[1]).filter(v => v != null);
       const avg = yp.length ? Math.round(yp.reduce((a, c) => a + c, 0) / yp.length) : null;
       const amt = ys.reduce((a, z) => a + (z[1] || 0) * (z[2] || 0), 0);
+      const mix = bizMix(ys);
       const td = el("td", "", y + "년   " + ys.length + "건" +
-        (avg != null ? "   평균단가 " + won(avg) : "") + "   합계 " + won(amt) + "원");
-      td.colSpan = 7;
+        (avg != null ? "   평균단가 " + won(avg) : "") + "   합계 " + won(amt) + "원" +
+        (mix ? "   —   " + mix : ""));
+      td.colSpan = 8;
       const tr = el("tr", "yhead"); tr.appendChild(td); tbd.appendChild(tr);
     }
 
     const p = x[1];
     const tr = el("tr", spread && p === lo ? "lo" : (spread && p === hi ? "hi" : ""));
     tr.appendChild(el("td", "num dim", x[0] || ""));
+
+    const bz = bizOf(x), bt = bizTag(bz);
+    const tdb = el("td", "biz");
+    if (bt) tdb.appendChild(el("i", "biztag " + bt.cls, bt.txt));
+    else tdb.appendChild(document.createTextNode("—"));
+    tdb.title = bz || "";
+    tr.appendChild(tdb);
 
     const tdp = el("td", "r num b", p != null ? won(p) : "");
     if (spread && p === lo) tdp.appendChild(el("i", "tag lo", "최저"));
@@ -5716,42 +5800,5 @@ pull().then(ok => { if (ok) { renderFilters(); renderSearch(); renderHist(); } }
 })();
 </script>
 
-
-<!-- ─────────────────────────────────────────────────────────────
-     업무포털 주소 — 포털 주소가 바뀌면 **아래 한 줄만** 고치세요.
-     이 스크립트가 페이지 안의 「← 업무포털」 링크를 전부 바꿔 줍니다.
-     ───────────────────────────────────────────────────────────── -->
-<script>
-  window.FITI_PORTAL = 'https://fiti-procurement-portal.vercel.app/';
-  (function () {
-    /* 수요부서 포털에서 넘어오면 주소에 ?from=dept&back=<돌아갈 주소> 가 붙습니다.
-       그때는 「← 업무포털」이 전략구매팀 포털이 아니라 수요부서 포털로 돌아갑니다.
-       한 번 들어오면 그 탭이 기억하므로(sessionStorage) 앱 안에서 옮겨 다녀도 유지됩니다.
-       back 은 주소로 들어오는 값이라 https 의 vercel.app 만 받습니다. */
-    var KEY = 'fiti.portalBack';
-    function clean(u) {
-      try { var x = new URL(u); return (x.protocol === 'https:' && /\.vercel\.app$/.test(x.hostname)) ? x.origin + x.pathname : ''; }
-      catch (e) { return ''; }
-    }
-    var back = '';
-    try {
-      var p = new URLSearchParams(location.search);
-      back = (p.get('from') === 'dept') ? clean(p.get('back') || '') : '';
-      if (back) sessionStorage.setItem(KEY, back);
-      else back = clean(sessionStorage.getItem(KEY) || '');
-    } catch (e) { back = ''; }
-
-    var target = back || window.FITI_PORTAL;
-    var sel = 'a[href*="procurement-portal"], a[data-portal]';
-    document.querySelectorAll(sel).forEach(function (a) {
-      a.href = target;
-      if (!back) return;
-      a.title = '수요부서 업무포털로 이동';
-      if (!a.children.length && /업무포털/.test(a.textContent)) {
-        a.textContent = a.textContent.replace('전략구매팀 업무포털', '수요부서 업무포털').replace(/^←\s*업무포털$/, '← 수요부서 포털');
-      }
-    });
-  })();
-</script>
 </body>
 </html>
