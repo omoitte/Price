@@ -323,10 +323,12 @@ table.hist td.biz i.biztag{display:inline-block;margin-top:0}
         <h1>소모품 가격검색</h1>
         <span class="brand-sub">사업지원본부 · 전략구매팀 · v1.1</span>
       </span>
-      <span class="sub" id="subline">—</span><span class="build">build 1020-A</span><span class="connstate" id="connState">연결 확인 중…</span>
+      <span class="sub" id="subline">—</span><span class="build">build 1103-A</span><span class="connstate" id="connState">연결 확인 중…</span><span class="sub" id="upState"></span>
       <nav>
         <button class="navb" id="nav-search" aria-current="true">검색</button>
         <button class="navb" id="nav-hist">수정 이력</button>
+        <button class="navb" id="nav-upload" title="구매통계 엑셀을 올려 발주 이력을 갱신합니다">자료 올리기</button>
+        <input type="file" id="upFile" accept=".xlsx,.xls" style="display:none">
       </nav>
     </div>
 
@@ -973,7 +975,7 @@ const BASE = [
 ];
 
 /* 발주 이력 집계 — 구매통계 xlsx 에서 생성(tools/buyagg.pl). 품목코드로 붙는다. */
-const BUY = [
+let BUY = [
 {"y":{"2024":[110000,2,330000,"2024-11-04"],"2025":[110000,1,220000,"2025-05-07"],"2026":[110000,1,220000,"2026-08-21"]},"k":"A010224752","code":"A010224752","name":"코팅각대봉투","n":4,"qty":7,"amt":770000,"first":"2024-08-06","last":"2026-08-21","lp":110000,"mn":110000,"mx":110000,"ven":"서울종합기획","vn":1,"biz":"수의계약","kind":"인쇄물","dept":"강남시험인증센터","h":[["2026-08-21",110000,2,"서울종합기획","강남시험인증센터",220000,"수의계약"],["2025-05-07",110000,2,"서울종합기획","강남시험인증센터",220000,"수의계약"],["2024-11-04",110000,1,"서울종합기획","광주시험인증센터",110000,"수의계약"],["2024-08-06",110000,2,"서울종합기획","섬유소비재지원팀",220000,"수의계약"]]},
 {"y":{"2026":[35240,1,352400,"2026-03-03"]},"k":"A010443763","code":"A010443763","name":"글로리텍 방수 폼택 (14칸/100매) ","n":1,"qty":10,"amt":352400,"first":"2026-03-03","last":"2026-03-03","lp":35240,"mn":35240,"mx":35240,"ven":"효성메디","vn":1,"biz":"입찰-소모품","kind":"소모품","dept":"광주시험인증센터","h":[["2026-03-03",35240,10,"효성메디","광주시험인증센터",352400,"입찰-소모품"]]},
 {"y":{"2026":[1800,1,90000,"2026-03-13"]},"k":"A010532350","code":"A010532350","name":"3M 장갑 ","n":1,"qty":50,"amt":90000,"first":"2026-03-13","last":"2026-03-13","lp":1800,"mn":1800,"mx":1800,"ven":"더링크","vn":1,"biz":"입찰-소모품","kind":"소모품","dept":"의장소재팀","h":[["2026-03-13",1800,50,"더링크","의장소재팀",90000,"입찰-소모품"]]},
@@ -5000,7 +5002,255 @@ const BUY = [
 {"y":{"2024":[71,2,1420000,"2024-12-04"],"2025":[32,2,192000,"2025-07-24"],"2026":[40,1,240000,"2026-05-28"]},"k":"Z020014190","code":"Z020014190","name":"시험접수용투명비닐 (핑크 28*43) (최소구매단위 2000장)","n":5,"qty":32000,"amt":1852000,"first":"2024-05-07","last":"2026-05-28","lp":40,"mn":32,"mx":71,"ven":"그린상사","vn":3,"biz":"수의계약","kind":"소모품","dept":"강남시험인증센터","h":[["2026-05-28",40,6000,"은선포장","강남시험인증센터",240000,"수의계약"],["2025-07-24",32,4000,"태극","전주시험인증센터",128000,"수의계약"],["2025-07-07",32,2000,"태극","대구시험인증센터",64000,"수의계약"],["2024-12-04",71,10000,"그린상사","강남시험인증센터",710000,"수의계약"],["2024-05-07",71,10000,"그린상사","시험품질운영팀",710000,"수의계약"]]},
 {"y":{"2024":[92,5,3864000,"2024-12-11"],"2025":[75,5,1796000,"2025-12-01"],"2026":[95,6,1345000,"2026-09-30"]},"k":"Z020019798","code":"Z020019798","name":"손잡이비닐봉투_로고 없는 투명/ 1000장/pack/ 63*63","n":16,"qty":80000,"amt":7006500,"first":"2024-04-11","last":"2026-09-30","lp":95,"mn":75,"mx":95,"ven":"그린상사","vn":4,"biz":"수의계약","kind":"소모품","dept":"안전인증팀","h":[["2026-09-30",95,2000,"은선포장","안전인증팀",190000,"소모품"],["2026-08-27",95,2000,"은선포장","안전인증팀",190000,"수의계약"],["2026-07-16",95,3000,"은선포장","가산디지털시험인증센터",285000,"수의계약"],["2026-06-12",95,4000,"은선포장","강남시험인증센터",380000,"수의계약"],["2026-03-25",75,2000,"태극","강남시험인증센터",150000,"수의계약"],["2026-03-13",75,2000,"태극","안전인증팀",150000,"수의계약"],["2025-12-01",75,10000,"그린상사 ","시험품질운영팀",750000,"입찰-소모품"],["2025-09-19",77,3000,"태극","강남시험인증센터",231900,"수의계약"],["2025-09-17",77,5000,"태극","가산디지털시험인증센터",385000,"수의계약"],["2025-07-31",77,2000,"태극","안전인증팀",154600,"수의계약"],["2025-04-11",92,3000,"그린상사","강남시험인증센터",276000,"수의계약"],["2024-12-11",92,10000,"그린상사","전략구매팀",920000,"수의계약"],["2024-09-10",92,10000,"그린상사","전략구매팀",920000,"수의계약"],["2024-07-08",92,10000,"그린상사","전략구매팀",920000,"수의계약"],["2024-06-10",92,10000,"그린상사","전략구매팀",920000,"수의계약"],["2024-04-11",92,2000,"그린상사","안전인증팀",184000,"수의계약"]]}
 ];
-const BUYMAP = new Map(BUY.map(b => [b.k, b]));
+let BUYMAP = new Map(BUY.map(b => [b.k, b]));
+
+/* ── 발주 이력 올리기 ────────────────────────────────────────────────
+   전에는 매달 rebuild.sh 를 돌려 index.html(3.3MB)을 다시 배포해야 했습니다.
+   이제 구매통계 엑셀을 이 화면에서 올리면 서버(Blob)에 들어가고,
+   다음 사람이 열 때 바로 보입니다 — 배포가 필요 없습니다.
+
+   집계 규칙은 tools/buyagg.pl 과 같습니다. 한쪽만 고치면 값이 어긋나니
+   둘을 함께 고치세요. */
+
+const UPLOAD_KEY_STORE = "fiti.price.editkey";
+const SHEETJS = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+
+/* 3.3MB 짜리 화면입니다. 엑셀 읽개는 올릴 때만 불러옵니다. */
+let sheetJsReady = null;
+function loadSheetJs() {
+  if (window.XLSX) return Promise.resolve();
+  if (sheetJsReady) return sheetJsReady;
+  sheetJsReady = new Promise((ok, no) => {
+    const s = document.createElement("script");
+    s.src = SHEETJS;
+    s.onload = () => ok();
+    s.onerror = () => no(new Error("엑셀 읽개를 불러오지 못했습니다 (인터넷 확인)"));
+    document.head.appendChild(s);
+  });
+  return sheetJsReady;
+}
+
+/* 발주일이 엑셀 일련번호(45372)로 오는 파일이 있습니다.
+   그대로 두면 연도를 "4537" 로 읽어 집계가 통째로 어긋납니다. */
+function xdate(v) {
+  if (v instanceof Date && !isNaN(v)) {
+    const p = (n) => String(n).padStart(2, "0");
+    return v.getFullYear() + "-" + p(v.getMonth() + 1) + "-" + p(v.getDate());
+  }
+  const s = String(v == null ? "" : v).trim();
+  if (!/^\d+(\.\d+)?$/.test(s)) return s;
+  const n = Math.floor(Number(s));
+  if (n < 20000 || n > 80000) return s;
+  const d = new Date(Date.UTC(1899, 11, 30) + n * 86400000);
+  const p = (x) => String(x).padStart(2, "0");
+  return d.getUTCFullYear() + "-" + p(d.getUTCMonth() + 1) + "-" + p(d.getUTCDate());
+}
+
+const nkCode = (v) => String(v == null ? "" : v).toUpperCase().replace(/[^A-Z0-9]/g, "");
+const numOr = (v, dflt) => {
+  const s = String(v == null ? "" : v).trim();
+  return /^\d+(\.\d+)?$/.test(s) ? Number(s) : dflt;
+};
+function topKey(map) {
+  let best = "", bestN = -1;
+  Object.keys(map).sort().forEach((k) => { if (map[k] > bestN) { best = k; bestN = map[k]; } });
+  return best;
+}
+
+/* 머리글이 「No · 발주일 … 」인 시트를 찾습니다.
+   파일마다 시트 이름이 달라(DATA(현행소모품) · Sheet1 …) 이름으로 찾지 않습니다. */
+function findDataSheet(wb) {
+  for (const nm of wb.SheetNames) {
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[nm], { header: 1, raw: true, defval: "" });
+    for (let i = 0; i < Math.min(rows.length, 20); i++) {
+      const r = rows[i] || [];
+      if (String(r[0]).trim() === "No" && String(r[1]).trim() === "발주일") {
+        return { name: nm, rows, headAt: i };
+      }
+    }
+  }
+  return null;
+}
+
+/* tools/buyagg.pl 과 같은 집계 — 품목코드별로 묶습니다. */
+function aggregatePurchases(rows, headAt) {
+  const it = {};
+  for (let i = headAt + 1; i < rows.length; i++) {
+    const c = rows[i] || [];
+    if (!/^\d+$/.test(String(c[0]).trim())) continue;      // 번호가 없는 줄은 자료가 아닙니다
+
+    const code = String(c[10] == null ? "" : c[10]).trim();
+    if (!/^[A-Za-z]/.test(code)) continue;                 // 00 · 99 같은 임시코드 제외
+    const k = nkCode(code);
+
+    const price = numOr(c[12], null);
+    const qty = numOr(c[13], 0);
+    const amt = numOr(c[14], 0);
+    const date = xdate(c[1]);
+    const name = String(c[11] == null ? "" : c[11]).trim();
+    const ven = String(c[9] == null ? "" : c[9]).trim();
+    const biz = String(c[4] == null ? "" : c[4]).trim();
+    const kind = String(c[5] == null ? "" : c[5]).trim();
+    const dept = String(c[21] == null ? "" : c[21]).trim();
+
+    const r = it[k] || (it[k] = { code, name: "", n: 0, qty: 0, amt: 0, first: "", last: "",
+                                  lp: null, mn: null, mx: null,
+                                  ven: {}, biz: {}, kind: {}, dept: {}, hist: [] });
+    r.n++;
+    r.qty += qty;
+    r.amt += amt;
+    if (name && name.length > r.name.length) r.name = name;
+    if (date && (r.first === "" || date < r.first)) r.first = date;
+    if (date && (r.last === "" || date > r.last)) { r.last = date; r.lp = price; }
+    if (price != null) {
+      if (r.mn == null || price < r.mn) r.mn = price;
+      if (r.mx == null || price > r.mx) r.mx = price;
+    }
+    if (ven) r.ven[ven] = (r.ven[ven] || 0) + 1;
+    if (biz) r.biz[biz] = (r.biz[biz] || 0) + 1;
+    if (kind) r.kind[kind] = (r.kind[kind] || 0) + 1;
+    if (dept) r.dept[dept] = (r.dept[dept] || 0) + 1;
+    // h[7] 구매구분 — tools/buyagg.pl 과 같은 자리. 한쪽만 고치면 값이 어긋납니다.
+    r.hist.push([date, price, qty, ven, dept, amt, biz, kind]);
+  }
+
+  return Object.keys(it).sort().map((k) => {
+    const r = it[k];
+    const all = r.hist.slice().sort((a, b) => String(b[0]).localeCompare(String(a[0])));
+
+    const yr = {};
+    all.forEach((x) => {
+      const y = String(x[0] || "").slice(0, 4);
+      if (!/^\d{4}$/.test(y)) return;
+      const s = yr[y] || (yr[y] = { p: null, n: 0, amt: 0, d: "" });
+      if (s.p == null && x[1] != null) { s.p = x[1]; s.d = x[0] || ""; }   // 최신순이라 처음 것이 그 해 최근값
+      s.n++;
+      s.amt += (x[1] || 0) * (x[2] || 0);
+    });
+    const y = {};
+    Object.keys(yr).sort().forEach((k2) => { y[k2] = [yr[k2].p, yr[k2].n, yr[k2].amt, yr[k2].d]; });
+
+    const o = { y, k, code: r.code, name: r.name, n: r.n, qty: r.qty, amt: r.amt,
+                first: r.first, last: r.last };
+    if (r.lp != null) o.lp = r.lp;
+    if (r.mn != null) o.mn = r.mn;
+    if (r.mx != null) o.mx = r.mx;
+    o.ven = topKey(r.ven);
+    o.vn = Object.keys(r.ven).length;
+    o.biz = topKey(r.biz);
+    o.kind = topKey(r.kind);
+    o.dept = topKey(r.dept);
+    o.h = all;
+    return o;
+  });
+}
+
+function editKey(ask) {
+  let v = "";
+  try { v = localStorage.getItem(UPLOAD_KEY_STORE) || ""; } catch (e) { }
+  if (v && !ask) return v;
+  const s = window.prompt("올리기 열쇠를 넣어 주세요.\n(Vercel 환경변수 PRICE_EDIT_KEY 와 같은 값입니다.\n이 브라우저에만 기억하고 서버로는 올릴 때만 보냅니다.)", v || "");
+  if (s === null) return v;
+  const t = String(s).trim();
+  try { if (t) localStorage.setItem(UPLOAD_KEY_STORE, t); else localStorage.removeItem(UPLOAD_KEY_STORE); } catch (e) { }
+  return t;
+}
+
+async function uploadPurchases(file) {
+  const say = (m) => { const el = $("upState"); if (el) el.textContent = m; };
+  try {
+    say("엑셀 읽개 부르는 중…");
+    await loadSheetJs();
+
+    say("파일 읽는 중…");
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
+
+    const found = findDataSheet(wb);
+    if (!found) {
+      say("");
+      alert("「No · 발주일 · 년도 …」 머리글이 있는 시트를 찾지 못했습니다.\n\n구매통계 원본 파일인지 확인해 주세요.\n시트 이름은 아무래도 됩니다.");
+      return;
+    }
+
+    say("집계하는 중… (시트 " + found.name + ")");
+    const rows = aggregatePurchases(found.rows, found.headAt);
+    if (!rows.length) { say(""); alert("읽을 수 있는 줄이 없습니다."); return; }
+
+    const asOf = rows.reduce((m, r) => (r.last > m ? r.last : m), "");
+    const key = editKey(false);
+    if (!key) {
+      // 열쇠가 없어도 읽은 것은 보여 줍니다 — 서버에는 안 올라갑니다
+      say("");
+      if (confirm("열쇠가 없어 서버에는 못 올립니다.\n\n읽어 둔 자료를 이 화면에만 걸어 둘까요?\n" +
+                  "품목 " + rows.length.toLocaleString("ko-KR") + "개 · 자료 기준 " + asOf +
+                  "\n(새로 고치면 사라지고, 다른 사람에게는 안 갑니다)")) {
+        applyPurchases(rows);
+        say("이 화면에만 적용됨 · " + asOf + " 기준");
+      }
+      return;
+    }
+
+    say("올리는 중… " + rows.length.toLocaleString("ko-KR") + "개 품목");
+    const res = await fetch("/api/purchases", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, asOf, rows }),
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      say("");
+      if (j.error === "bad_key") { editKey(true); alert("열쇠가 맞지 않습니다. 다시 넣어 주세요."); return; }
+      /* 서버에 못 올려도 읽어 둔 자료는 멀쩡합니다.
+         배포 전이거나 열쇠를 아직 안 넣었을 때 — 이 브라우저에서만이라도 보게 합니다.
+         새로 고치면 사라집니다. 다른 사람에게는 안 갑니다. */
+      if (confirm("서버에 올리지 못했습니다.\n\n" + (j.message || res.status) +
+                  "\n\n읽어 둔 자료를 이 화면에만 걸어 둘까요?\n" +
+                  "품목 " + rows.length.toLocaleString("ko-KR") + "개 · 자료 기준 " + asOf +
+                  "\n(새로 고치면 사라지고, 다른 사람에게는 안 갑니다)")) {
+        applyPurchases(rows);
+        say("이 화면에만 적용됨 · " + asOf + " 기준");
+      }
+      return;
+    }
+
+    say("");
+    applyPurchases(rows);
+    alert("올렸습니다.\n\n품목 " + rows.length.toLocaleString("ko-KR") + "개 · 자료 기준 " + asOf +
+          "\n\n다른 사람도 새로 고치면 이 자료를 봅니다.");
+  } catch (e) {
+    say("");
+    alert("올리는 중 막혔습니다.\n\n" + ((e && e.message) || e));
+  }
+}
+
+function rebuildBuyMap() {
+  BUYMAP = new Map(BUY.map((b) => [b.k, b]));
+}
+
+/* 읽어 온 발주 이력으로 화면을 갈아끼웁니다. 올리기 성공/실패 두 곳이 같이 씁니다. */
+function applyPurchases(rows) {
+  BUY = rows;
+  rebuildBuyMap();
+  renderFilters();
+  renderSearch();
+}
+
+/* 서버에 올라와 있는 자료가 있으면 그걸 씁니다. 없으면 이 파일에 박힌 값을 그대로. */
+async function pullPurchases() {
+  try {
+    const r = await fetch("/api/purchases", { cache: "no-store" });
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || !Array.isArray(j.rows) || !j.rows.length) return null;
+    BUY = j.rows;
+    rebuildBuyMap();
+    return j;
+  } catch (e) {
+    return null;
+  }
+}
+
 
 const KEY = "FITI_UNITPRICE_V1";
 const FIELDS = ["vendor","year","code","partno","name","spec","maker","list","price","note"];
@@ -5099,6 +5349,16 @@ const latestVen = b => {
 const buyerOf = r =>
   latestVen(r.buy) || r.sup || String(r.vendor || "").replace(" 소모품", "");
 
+/* 구매업무 칸에 그룹웨어 「구매업무」 메뉴 이름이 그대로 들어오는 건이 많습니다.
+   메뉴는 계약방법이 아니라 **어느 결재선으로 올렸느냐**입니다 —
+   입찰 메뉴가 아닌 것은 전부 수의계약입니다(구매및계약 업무요령 제15조의2).
+
+   지금 메뉴 — 소모품 구매 · 일반구매요청 · 구매협조요청 · 시험기기수리/개조 ·
+                (사업비)구매협조요청 · (사업비)소모품 구매 · 건설중인자산
+   내년에 **인쇄물 구매 · 시험보조기구** 메뉴가 늘 예정이라 미리 넣어 두었습니다.
+   건설중인자산은 자산 계정이라 계약방법을 단정할 수 없어 **뺐습니다** — 이름 그대로 나옵니다. */
+const PRIV_MENUS = /소모품|일반|구매협조|시험기기수리|개조|인쇄물|시험보조/;
+
 /* 구매업무 → 계약 방식 배지. 수의계약·입찰·사업비를 한눈에 구분한다 */
 function bizTag(s) {
   if (!s) return null;
@@ -5106,6 +5366,8 @@ function bizTag(s) {
   if (/단가계약/.test(s)) return { txt: "단가계약", cls: "unit" };
   if (/입찰/.test(s))  return { txt: 사업비 ? "입찰·사업비" : "입찰",   cls: "bid" };
   if (/수의/.test(s))  return { txt: 사업비 ? "수의·사업비" : "수의계약", cls: "priv" };
+  // 메뉴 이름은 사업비 여부보다 먼저 봅니다 — 「(사업비)구매협조」는 수의계약·사업비입니다
+  if (PRIV_MENUS.test(s)) return { txt: 사업비 ? "수의·사업비" : "수의계약", cls: "priv" };
   if (사업비)          return { txt: "사업비", cls: "fund" };
   if (/수리/.test(s))  return { txt: "수리",   cls: "etc" };
   return { txt: s, cls: "etc" };
@@ -5424,13 +5686,15 @@ function renderSearch() {
     const seen = {};
     let tags = bizKinds(r.buy).map(bizTag).filter(Boolean)
       .filter(t => { if (seen[t.txt]) return false; seen[t.txt] = 1; return true; });
-    /* 「소모품」처럼 계약 방식이 아닌 값(구매구분이 그대로 들어온 121건)은
-       방식이 하나라도 있으면 접습니다 — 이 칸은 수의냐 입찰이냐를 보는 자리입니다. */
+    /* 방식으로 읽히지 않는 값(건설중인자산 같은 계정 이름)은
+       방식이 하나라도 있으면 접습니다 — 이 칸은 수의냐 입찰이냐를 보는 자리입니다.
+       「소모품」·「일반」 같은 그룹웨어 메뉴 이름은 bizTag 가 수의계약으로 읽으니 여기 안 걸립니다. */
     if (tags.some(t => t.cls !== "etc")) tags = tags.filter(t => t.cls !== "etc");
     tags.forEach(t => tdv.appendChild(el("i", "biztag " + t.cls, t.txt)));
     tdv.title = ["단가표 묶음 " + r.vendor,
                  r.buy ? "최근 거래처 " + latestVen(r.buy) + (r.buy.vn > 1 ? " 외 " + (r.buy.vn - 1) + "곳" : "") : "",
                  r.buy ? "구매업무 " + (bizMix(r.buy.h || []) || r.buy.biz || "") : "",
+                 r.buy ? "구매구분 " + (kindMix(r.buy.h || []) || r.buy.kind || "") : "",
                  r.sup ? "단가표 공급 " + r.sup : "", r.partno ? "제품번호 " + r.partno : "",
                  r.spec ? "규격·제조사 " + r.spec : "", r.list != null ? "소비자가 " + won(r.list) : "",
                  r.note, r.src].filter(Boolean).join("\n");
@@ -5558,6 +5822,17 @@ function bizKinds(b) {
 /* 구매업무는 건마다 다릅니다 — 같은 소모품을 수의계약으로도, 입찰-소모품으로도 삽니다.
    「소모품이니 전부 수의계약」이 아니어서 건별로 보여 줍니다. h[6] 에 들어 있습니다. */
 const bizOf = x => String((x && x[6]) || "").trim();
+/* 구매구분(소모품 · 시약 · 가스 · 인쇄물 · 공기구비품)을 건별로 섞인 그대로.
+   내년부터 소모품구매에 인쇄비 · 시험보조기구가 들어와 한 품목에 둘 이상 붙습니다.
+   옛 자료에는 h[7] 이 없어 비어 나오고, 그때는 부르는 쪽이 대표값 b.kind 로 돌아갑니다. */
+function kindMix(rows) {
+  const c = {};
+  rows.forEach(x => { const v = String(x[7] || "").trim(); if (v) c[v] = (c[v] || 0) + 1; });
+  const ks = Object.keys(c).sort((a, b) => c[b] - c[a] || a.localeCompare(b));
+  if (!ks.length) return "";
+  return ks.map(k => k + " " + c[k] + "건").join("  ·  ");
+}
+
 function bizMix(rows) {
   const c = {};
   rows.forEach(x => { const v = bizOf(x); if (v) c[v] = (c[v] || 0) + 1; });
@@ -5575,7 +5850,7 @@ function openBuy(r) {
    ["최근 단가", b.lp != null ? won(b.lp) : "—"],
    ["최저-최고", (b.mn != null ? won(b.mn) + " - " + won(b.mx) : "")],
    ["기간", (b.first || "") + " - " + (b.last || "")],
-   ["최근 거래처", latestVen(b)], ["주거래처", b.ven], ["구매업무", bizMix(b.h || []) || b.biz], ["구매구분", b.kind], ["주요청부서", b.dept],
+   ["최근 거래처", latestVen(b)], ["주거래처", b.ven], ["구매업무", bizMix(b.h || []) || b.biz], ["구매구분", kindMix(b.h || []) || b.kind], ["주요청부서", b.dept],
   ].forEach(([k, v]) => {
     const row = el("div", "brow");
     row.appendChild(el("span", "bk", k));
@@ -5797,6 +6072,21 @@ renderSearch();
 
 // 서버 저장소에서 수정분·이력을 받아온다. 없으면 이 브라우저 값만 쓴다.
 pull().then(ok => { if (ok) { renderFilters(); renderSearch(); renderHist(); } });
+
+// 서버에 올라와 있는 발주 이력이 있으면 그걸로 갈아끼웁니다(배포 없이 갱신되는 길).
+pullPurchases().then(j => {
+  if (!j) return;
+  renderFilters(); renderSearch();
+  const s = $("subline");
+  if (s && j.asOf) s.textContent += "  ·  발주 이력 " + j.asOf + " 기준";
+});
+
+$("nav-upload")?.addEventListener("click", () => $("upFile")?.click());
+$("upFile")?.addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (f) uploadPurchases(f);
+});
 })();
 </script>
 

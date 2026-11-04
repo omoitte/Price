@@ -16,7 +16,7 @@ const PURCHASE_PATH = '/purchases.json';
 
 let CACHE = null;         // 같은 인스턴스에서 재사용
 let CACHE_AT = 0;
-const TTL_MS = 10 * 60 * 1000;
+const TTL_MS = 2 * 60 * 1000;   // 「자료 올리기」 뒤 2분이면 검색에도 따라옵니다
 
 async function getJson(req, path) {
   const host = req.headers['x-forwarded-host'] || req.headers.host;
@@ -24,6 +24,16 @@ async function getJson(req, path) {
   const res = await fetch(`${proto}://${host}${path}`);
   if (!res.ok) throw new Error(`${path} ${res.status}`);
   return res.json();
+}
+
+/* 발주 이력 — 「자료 올리기」로 서버(Blob)에 올라온 것이 있으면 그것을 먼저 씁니다.
+   없으면(아직 한 번도 안 올렸으면) 배포된 purchases.json 으로 돌아갑니다. */
+async function getPurchases(req) {
+  try {
+    const j = await getJson(req, '/api/purchases');
+    if (j && Array.isArray(j.rows) && j.rows.length) return j.rows;
+  } catch (e) { /* 아래 옛 경로로 */ }
+  return getJson(req, PURCHASE_PATH);
 }
 
 function yearOf(dateStr) {
@@ -38,7 +48,7 @@ async function loadIndex(req) {
   // 한쪽이 없어도 나머지로 검색이 되게 각각 따로 받습니다.
   const [catRes, purRes] = await Promise.allSettled([
     getJson(req, CATALOG_PATH),
-    getJson(req, PURCHASE_PATH)
+    getPurchases(req)
   ]);
 
   const rows = [];
