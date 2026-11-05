@@ -12,6 +12,7 @@
 import { put, get } from "@vercel/blob";
 
 const PATH = "unitprice/purchases.json";
+const PATH_PREV = "unitprice/purchases.prev.json";   // 덮기 직전 한 벌
 const MAX_BYTES = 40 * 1024 * 1024;     // 과하게 큰 요청은 받지 않습니다
 
 function blobOpt() {
@@ -67,19 +68,31 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+      /* 열쇠(PRICE_EDIT_KEY)를 넣어 두면 열쇠가 맞아야 올라갑니다.
+         안 넣었으면(11-04 사용자 지시 「해결해」) 열쇠 없이 받되, 엉뚱한 파일로 덮이지 않게
+         ① 품목 1,000개 미만은 거부 ② 덮기 직전 자료를 unitprice/purchases.prev.json 으로 백업합니다. */
       const need = process.env.PRICE_EDIT_KEY;
-      if (!need) {
-        return res.status(501).json({
-          error: "key_not_set",
-          message: "환경변수 PRICE_EDIT_KEY 를 넣고 Redeploy 하세요. 그 전에는 올리기가 막혀 있습니다.",
-        });
-      }
       const b = body(req);
-      if (String(b.key || "") !== String(need)) {
+      if (need && String(b.key || "") !== String(need)) {
         return res.status(401).json({ error: "bad_key", message: "열쇠가 맞지 않습니다." });
       }
       if (!Array.isArray(b.rows) || !b.rows.length) {
         return res.status(400).json({ error: "no_rows", message: "올릴 자료가 비어 있습니다." });
+      }
+      const MIN_ROWS = 1000;
+      const okRows = b.rows.filter((x) => x && (x.k || x.code) && x.name).length;
+      if (okRows < MIN_ROWS) {
+        return res.status(400).json({
+          error: "too_few",
+          message: `품목이 ${okRows.toLocaleString("ko-KR")}개뿐입니다. 구매통계 전체 파일(품목 ${MIN_ROWS.toLocaleString("ko-KR")}개 이상)만 받습니다.`,
+        });
+      }
+      const prev = await readRows();
+      if (prev && prev.rows.length) {
+        await put(PATH_PREV, JSON.stringify(prev), {
+          access: "private", allowOverwrite: true, addRandomSuffix: false,
+          contentType: "application/json", ...opt,
+        });
       }
 
       const payload = JSON.stringify({
