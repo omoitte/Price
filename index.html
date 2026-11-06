@@ -311,6 +311,18 @@ table.hist td.biz i.biztag{display:inline-block;margin-top:0}
   table.grid th.c-name,table.grid td.c-name{position:static;border-right:1px solid var(--rule-soft)}
   table.grid th.c-code,table.grid td.c-code{border-right:2px solid var(--rule)}
 }
+/* 날짜별 구매 (11-06) */
+.buybar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.buybar select, .buybar input{ font:inherit; font-size:13px; padding:6px 10px; border:1px solid #d5dbe1; border-radius:8px; background:#fff; }
+.buybar input{ flex:1; min-width:200px; }
+.buywrap{ max-height:calc(100vh - 220px); overflow:auto; border:1px solid #e3e7eb; border-radius:10px; background:#fff; }
+.buytbl{ width:100%; border-collapse:collapse; font-size:12.5px; }
+.buytbl th{ position:sticky; top:0; background:#f4f6f8; text-align:left; padding:8px 10px; font-weight:600; border-bottom:1px solid #e3e7eb; white-space:nowrap; }
+.buytbl td{ padding:7px 10px; border-bottom:1px solid #f0f2f4; vertical-align:top; }
+.buytbl td:first-child{ white-space:nowrap; color:#555; }
+.buytbl .r{ text-align:right; white-space:nowrap; }
+.buytbl .bid{ color:#b45309; font-weight:600; }
+.buytbl .empty{ text-align:center; color:#888; padding:30px; }
 </style>
 </head>
 <body>
@@ -323,9 +335,11 @@ table.hist td.biz i.biztag{display:inline-block;margin-top:0}
         <h1>소모품 가격검색</h1>
         <span class="brand-sub">사업지원본부 · 전략구매팀 · v1.1</span>
       </span>
-      <span class="sub" id="subline">—</span><span class="build">build 1104-A</span><span class="connstate" id="connState">연결 확인 중…</span><span class="sub" id="upState"></span>
+      <span class="sub" id="subline">—</span><span class="build">build 1106-A</span><span class="connstate" id="connState">연결 확인 중…</span><span class="sub" id="upState"></span>
       <nav>
+        <a class="navb" id="portalBack" href="https://fiti-procurement-portal.vercel.app/" title="전략구매팀 업무포털로 이동" style="text-decoration:none">← 업무포털</a>
         <button class="navb" id="nav-search" aria-current="true">검색</button>
+        <button class="navb" id="nav-buy" title="모든 발주를 날짜순으로">날짜별 구매</button>
         <button class="navb" id="nav-hist">수정 이력</button>
         <button class="navb" id="nav-upload" title="구매통계 엑셀을 올려 발주 이력을 갱신합니다">자료 올리기</button>
         <input type="file" id="upFile" accept=".xlsx,.xls" style="display:none">
@@ -353,6 +367,18 @@ table.hist td.biz i.biztag{display:inline-block;margin-top:0}
     <div class="meta"><span class="n" id="cnt">0</span><span class="sub" id="cntsub"></span></div>
     <div id="results"></div>
   </div>
+  <div id="view-buy" hidden>
+    <div class="meta buybar">
+      <select id="buyMonth"></select>
+      <input id="buyQ" type="search" placeholder="품목 · 거래처 · 부서 · 구매업무로 거르기" autocomplete="off">
+      <span class="sub" id="buyCnt"></span>
+    </div>
+    <div class="buywrap"><table class="buytbl">
+      <thead><tr><th>발주일</th><th>품목코드</th><th>품목명</th><th>거래처</th><th>부서</th><th class="r">수량</th><th class="r">단가</th><th class="r">금액</th><th>구매업무</th></tr></thead>
+      <tbody id="buyRows"></tbody>
+    </table></div>
+  </div>
+
   <div id="view-hist" hidden>
     <div class="meta"><span class="n" id="hcnt">0</span><span class="sub">건의 수정 기록 · 최신순</span></div>
     <div class="hist" id="histlist"></div>
@@ -5218,6 +5244,9 @@ async function uploadPurchases(file) {
 
 function rebuildBuyMap() {
   BUYMAP = new Map(BUY.map((b) => [b.k, b]));
+  BUYFLAT = null;
+  const s = document.getElementById("buyMonth"); if (s) s.innerHTML = "";
+  if (view === "buy") renderBuy();
 }
 
 /* 읽어 온 발주 이력으로 화면을 갈아끼웁니다. 올리기 성공/실패 두 곳이 같이 씁니다. */
@@ -6028,9 +6057,42 @@ function setView(v) {
   $("nav-hist").setAttribute("aria-current", v === "hist" ? "true" : "false");
   $("view-search").hidden = v !== "search";
   $("view-hist").hidden = v !== "hist";
+  $("nav-buy").setAttribute("aria-current", v === "buy" ? "true" : "false");
+  $("view-buy").hidden = v !== "buy";
   $("searchui").style.display = v === "search" ? "" : "none";
   if (v === "hist") renderHist();
+  if (v === "buy") renderBuy();
 }
+
+/* ── 날짜별 구매 (11-06) — 품목마다 들고 있는 h 를 한 줄씩 펼쳐 발주일 최신순으로.
+   h = [날짜, 단가, 수량, 거래처, 부서, 금액, 구매업무, 구매구분]. 한 번에 1,000줄까지만 그립니다. */
+let BUYFLAT = null;
+function flatBuy() {
+  if (BUYFLAT) return BUYFLAT;
+  const out = [];
+  BUY.forEach(b => (b.h || []).forEach(x => out.push([String(x[0] || ""), b.k || b.code || "", b.name || "", x[3] || "", x[4] || "", x[2], x[1], x[5], x[6] || ""])));
+  out.sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0));
+  return (BUYFLAT = out);
+}
+function renderBuy() {
+  const all = flatBuy();
+  const sel = $("buyMonth");
+  if (!sel.options.length) {
+    const ms = [...new Set(all.map(r => r[0].slice(0, 7)).filter(Boolean))];
+    sel.innerHTML = '<option value="">전체 기간</option>' + ms.map(m => `<option value="${m}">${m.replace("-", "년 ")}월</option>`).join("");
+    if (ms[0]) sel.value = ms[0];
+  }
+  const m = sel.value, q = $("buyQ").value.trim().toLowerCase();
+  const rows = all.filter(r => (!m || r[0].startsWith(m)) && (!q || (r[1] + " " + r[2] + " " + r[3] + " " + r[4] + " " + r[8]).toLowerCase().includes(q)));
+  const sum = rows.reduce((s, r) => s + (Number(r[7]) || 0), 0);
+  $("buyCnt").textContent = rows.length.toLocaleString("ko-KR") + "건 · " + won(sum) + "원" + (rows.length > 1000 ? " · 위 1,000건만 표시" : "");
+  const h = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  $("buyRows").innerHTML = rows.slice(0, 1000).map(r =>
+    `<tr><td>${h(r[0])}</td><td>${h(r[1])}</td><td>${h(r[2])}</td><td>${h(r[3])}</td><td>${h(r[4])}</td><td class="r">${won(r[5])}</td><td class="r">${won(r[6])}</td><td class="r">${won(r[7])}</td><td${/입찰/.test(r[8]) ? ' class="bid"' : ""}>${h(r[8])}</td></tr>`).join("")
+    || '<tr><td colspan="9" class="empty">해당 기간 발주가 없습니다</td></tr>';
+}
+$("buyMonth").onchange = renderBuy;
+$("buyQ").addEventListener("input", () => { clearTimeout(deb); deb = setTimeout(renderBuy, 150); });
 
 let deb = 0;
 $("q").addEventListener("input", () => { clearTimeout(deb); deb = setTimeout(renderSearch, 120); });
@@ -6040,6 +6102,7 @@ $("btnSave").onclick = commit;
 $("btnDel").onclick = removeItem;
 $("nav-search").onclick = () => setView("search");
 $("nav-hist").onclick = () => setView("hist");
+$("nav-buy").onclick = () => setView("buy");
 document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => close(b.dataset.close));
 $("editMask").onclick = e => { if (e.target === $("editMask")) close("editMask"); };
 addEventListener("keydown", e => {
